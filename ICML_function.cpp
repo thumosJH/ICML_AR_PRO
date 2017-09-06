@@ -133,8 +133,6 @@ bool CFeatures_2D::recognise_ImageDatabase(Mat queryImage)
 	this->Descriptor->compute(queryImage, queryKeypoints, queryDescriptors);
 	queryDescriptors.convertTo(queryDescriptors, CV_32F);
 	
-	
-	// 여기서 에러 발생
 	cout << "HERE1~!\n";
 	cout << "Query Image type = " << queryDescriptors.type() <<", dim = " << queryDescriptors.dims<< endl;
 	cout << "Train Image 0 type = "<<this->databaseDescriptors[0].type()<< ", dim = "<< this->databaseDescriptors[0].dims <<  endl;
@@ -188,7 +186,7 @@ bool CFeatures_2D::recognise_ImageDatabase(Mat queryImage)
 			max_indx3 = i;
 		}
 	}
-	cout << "HERE4~!\n";
+	
 	// Finding Incorrect Nearest matches with homography calculation 
 	vector<Point2f> points1, points2, points3, trainpts1, trainpts2, trainpts3;
 
@@ -214,7 +212,7 @@ bool CFeatures_2D::recognise_ImageDatabase(Mat queryImage)
 			trainpts3.push_back(this->databaseKeypoints[max_indx3][dmatch3.trainIdx].pt);
 		}
 	}
-
+	
 	Mat test_H1, test_H2, test_H3;
 
 	Mat mask1, mask2, mask3;
@@ -229,6 +227,8 @@ bool CFeatures_2D::recognise_ImageDatabase(Mat queryImage)
 
 	Scalar sum1 = sum(mask1);   Scalar sum2 = sum(mask2);   Scalar sum3 = sum(mask3);
 
+	cout << "HERE4~!\n";
+
 	if ((sum1[0]>sum2[0]) && (sum1[0]>sum3[0]))
 		matched_indx = max_indx1;
 	else if (sum2[0]>sum3[0])
@@ -241,11 +241,12 @@ bool CFeatures_2D::recognise_ImageDatabase(Mat queryImage)
 		this->databaseRecognisedImg = this->imageDatabase[matched_indx];
 		this->databaseRecognisedName = this->trainImageNames[matched_indx];
 		this->databaseRecognisedIndx = matched_indx;
+		cout << "HERE5~!\n";
 		return true;
 	}
 	else
 		return false;
-	cout << "HERE5~!\n";
+	
 }
 
 bool CFeatures_2D::train_ImageDatabase(const string& trainingImgsFilename)
@@ -327,9 +328,14 @@ bool CFeatures_2D::track_Object(Mat queryImage)
 
 	this->Detector_tracker->detect(queryImage, queryKeypoints);
 	this->Descriptor_tracker->compute(queryImage, queryKeypoints, queryDescriptors);
-	
 	queryDescriptors.convertTo(queryDescriptors, CV_32F);
+	
+	// @@_여기서 에러 발생_@@
+	cout << "tracked Index = " << this->databaseRecognisedIndx<<endl;
+	this->trackedDescriptors = this->databaseDescriptors[this->databaseRecognisedIndx];
+	imshow("computed Image by Matcher", this->imageDatabase[this->databaseRecognisedIndx]);
 	this->Matcher_tracker->match(queryDescriptors, this->trackedDescriptors, matches);
+	cout << "HERE7~!\n";
 	if (queryDescriptors.type() == this->trackedDescriptors.type())
 		this->Matcher_tracker->match(queryDescriptors, this->trackedDescriptors, matches);
 	else{
@@ -339,12 +345,7 @@ bool CFeatures_2D::track_Object(Mat queryImage)
 
 	vector<Point2f> points1, trainpts;
 
-	//this->matches2points(this->databaseKeypoints[this->databaseRecognisedIndx], queryKeypoints, matches, trainpts, points1);
-	// matches에 저장된 인덱스 값을 가지고 각각의 이미지 특징점의 좌표를 trainpts, points1 벡터에 저장한다.
-	// 뒤에 나오는 homography값을 계산하기 위해서 좌표값을 받는다.
 	this->matches2points(this->trackedKeypoints, queryKeypoints, matches, trainpts, points1);
-
-	//KeyPoint::convert( keypoints1, points1 );
 
 	if (matches.size() > 5)
 	{

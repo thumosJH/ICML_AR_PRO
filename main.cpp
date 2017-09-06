@@ -76,13 +76,13 @@ int main()
 		{
 			//if(Feat_2d_ptr->match_CalonderClassifier(gray,calond_desc))
 
-
+			
 			if (Feat_2d_ptr->track_Object(gray))	// 여기까지 진행하면 gray이미지와 특징점 계산 및 매칭 
 			{
 				for (int i = 0; i < 4; i++)
 				{
 					double x = origCorners[i].x, y = origCorners[i].y;
-
+					cout << "HERE8_"<<i<<"~!\n";
 					h11 = Feat_2d_ptr->H_transf.at<double>(0, 0);  h12 = Feat_2d_ptr->H_transf.at<double>(0, 1);  h13 = Feat_2d_ptr->H_transf.at<double>(0, 2);
 					h21 = Feat_2d_ptr->H_transf.at<double>(1, 0);  h22 = Feat_2d_ptr->H_transf.at<double>(1, 1);  h23 = Feat_2d_ptr->H_transf.at<double>(1, 2);
 					h31 = Feat_2d_ptr->H_transf.at<double>(2, 0);  h32 = Feat_2d_ptr->H_transf.at<double>(2, 1);  h33 = Feat_2d_ptr->H_transf.at<double>(2, 2);
@@ -95,21 +95,22 @@ int main()
 					warpedPoints[i] = Point(cvRound(X), cvRound(Y));
 
 				}
-
+				
 				line(frame, warpedPoints[0], warpedPoints[1], Scalar(255, 50, 200), 3);
 				line(frame, warpedPoints[1], warpedPoints[2], Scalar(255, 50, 200), 3);
 				line(frame, warpedPoints[2], warpedPoints[3], Scalar(255, 50, 200), 3);
 				line(frame, warpedPoints[3], warpedPoints[0], Scalar(255, 50, 200), 3);
-
+				cout << "HERE9~!\n";
 			}
 
 			Size textsize = getTextSize(Feat_2d_ptr->databaseRecognisedName, CV_FONT_HERSHEY_COMPLEX, 1.5, 2, 0);
 
 			Point org((frame.cols - textsize.width) / 2, (frame.rows - textsize.height));
-
+			
 			putText(frame, Feat_2d_ptr->databaseRecognisedName, org, CV_FONT_HERSHEY_COMPLEX, 1.5, Scalar(50, 240, 240), 2, 8);
+			cout << "HERE10~!\n";
 		}
-
+		
 		imshow("frame", frame);
 
 
@@ -136,14 +137,16 @@ int main()
 				origCorners[2].y = Feat_2d_ptr->databaseRecognisedImg.rows;
 				origCorners[3].x = 0;
 				origCorners[3].y = Feat_2d_ptr->databaseRecognisedImg.rows;
-
+				
+				
 				Feat_2d_ptr->Detector_tracker->detect(Feat_2d_ptr->databaseRecognisedImg
 					, Feat_2d_ptr->trackedKeypoints);
 				Feat_2d_ptr->Descriptor_tracker->compute(Feat_2d_ptr->databaseRecognisedImg
 					, Feat_2d_ptr->trackedKeypoints, Feat_2d_ptr->trackedDescriptors);
-
-
+				Feat_2d_ptr->trackedDescriptors.convertTo(Feat_2d_ptr->trackedDescriptors, CV_32F);
+				
 				print_recog = true;
+				cout << "HERE6~!\n";
 			}
 			break;
 		case 's':
